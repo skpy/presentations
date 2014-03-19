@@ -45,7 +45,7 @@ sudo chown -R www-data owncloud
 * [nginx](http://doc.owncloud.org/server/6.0/admin_manual/installation/installation_source.html#nginx-configuration)
   * and [FPM](http://us3.php.net/fpm)
 * [APC caching](http://us1.php.net/apc)
-  * CentOS [php-pecl-apc](php-pecl-apc)
+  * CentOS php-pecl-apc
   * Ubuntu [php-apc](http://packages.ubuntu.com/saucy/php-apc)
 * [X-Sendfile](http://doc.owncloud.org/server/6.0/admin_manual/configuration/xsendfile.html)
 * [Apps](http://apps.owncloud.com/)
