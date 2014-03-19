@@ -7,10 +7,11 @@ These examples do not promote performance or security.  You have been warned.
 
 ## ownCloud on CentOS
 ```shell
+wget https://download.owncloud.org/download/community/owncloud-latest.zip
 sudo yum -y update
 sudo yum -y install sqlite httpd php php-gd php-xml php-mbstring php-intl php-pdo
 cd /var/www/html
-sudo tar jxf ~/owncloud-6.0.2.tar.bz2
+unzip ~/owncloud-latest.zip
 sudo chown -R apache owncloud
 sudo cat << EOF >> /etc/httpd/conf.d/owncloud.conf:
 <Directory /var/www/html/owncloud>
@@ -24,11 +25,13 @@ EOF
 
 ## ownCloud on Ubuntu
 ```shell
+wget https://download.owncloud.org/download/community/owncloud-latest.zip
 sudo apt-get update && sudo apt-get upgrade
 sudo apt-get install apache2 libapache2-mod-php5 php5-gd php5-json php5-sqlite php5-curl php5-intl php5-mcrypt
 sudo a2enmod rewrite
 sudo service apache2 restart
-sudo tar jxf ~/owncloud-6.0.2.tar.bz2
+cd /var/www/
+unzip ~/owncloud-latest.zip
 sudo chown -R www-data owncloud
 ```
 
