@@ -44,6 +44,7 @@ sudo chown -R www-data owncloud
 ## Other Stuff
 * [nginx](http://doc.owncloud.org/server/6.0/admin_manual/installation/installation_source.html#nginx-configuration)
   * and [FPM](http://us3.php.net/fpm)
+  * tweak PHP upload sizes 
 * [APC caching](http://us1.php.net/apc)
   * CentOS php-pecl-apc
   * Ubuntu [php-apc](http://packages.ubuntu.com/saucy/php-apc)
