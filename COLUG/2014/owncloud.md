@@ -9,11 +9,11 @@ These examples do not promote performance or security.  You have been warned.
 ```shell
 wget https://download.owncloud.org/download/community/owncloud-latest.zip
 sudo yum -y update
-sudo yum -y install sqlite httpd php php-gd php-xml php-mbstring php-intl php-pdo
+sudo yum -y install sqlite httpd php php-gd php-xml php-mbstring php-intl php-pdo unzip
 cd /var/www/html
-unzip ~/owncloud-latest.zip
+sudo unzip ~/owncloud-latest.zip
 sudo chown -R apache owncloud
-sudo cat << EOF >> /etc/httpd/conf.d/owncloud.conf:
+sudo cat <<EOF >> /etc/httpd/conf.d/owncloud.conf:
 <Directory /var/www/html/owncloud>
     Options Indexes FollowSymLinks MultiViews
     AllowOverride All
@@ -27,7 +27,7 @@ EOF
 ```shell
 wget https://download.owncloud.org/download/community/owncloud-latest.zip
 sudo apt-get update && sudo apt-get upgrade
-sudo apt-get install apache2 libapache2-mod-php5 php5-gd php5-json php5-sqlite php5-curl php5-intl php5-mcrypt
+sudo apt-get install apache2 libapache2-mod-php5 php5-gd php5-json php5-sqlite php5-curl php5-intl php5-mcrypt unzip
 sudo a2enmod rewrite
 sudo service apache2 restart
 cd /var/www/
