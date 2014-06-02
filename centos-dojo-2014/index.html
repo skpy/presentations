@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>Stupid Puppet Tricks</title>
+
+		<meta name="description" content="A presentation at the Cincinnati CentOS Dojo, 2014">
+		<meta name="author" content="Scott Merrill">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<link rel="stylesheet" href="css/reveal.min.css">
+		<link rel="stylesheet" href="css/theme/night.css" id="theme">
+
+		<!-- For syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+		<script>
+			if( window.location.search.match( /print-pdf/gi ) ) {
+				var link = document.createElement( 'link' );
+				link.rel = 'stylesheet';
+				link.type = 'text/css';
+				link.href = 'css/print/pdf.css';
+				document.getElementsByTagName( 'head' )[0].appendChild( link );
+			}
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+							<section>
+							<h1>stupid puppet tricks</h1>
+							<p>&nbsp;</p>
+							<h2>mirroring yum repositories</h2>
+							<p>&nbsp;</p>
+							<h3>scott merrill</h3>
+							<h4><a href="mailto:skippy@skippy.net">skippy@skippy.net</a></h4>
+							<h4><a href="https://twitter.com/smerrill">@smerrill</a></h4>
+							</section>
+
+							<section>
+							<h1>about me</h1>
+							<p>&nbsp;</p>
+							<h2><a href="https://www.covermymeds.com/">CoverMyMeds</a></h2>
+							<h4>automate all the things!</h4>
+							<h4>puppet, red hat, apache, ruby</h4>
+							</section>
+
+							<section>
+							<h1>the problem</h1>
+							<h3>we want a local yum mirror</h3>
+							</section>
+							
+							<section>
+							<h2>devil's in the details</h2>
+							<ul>
+											<li>multiple repositories</li>
+											<li>no EPEL dependency</li>
+											<li>a web server</li>
+											<li>maintainability</li>
+											<li>reproducability</li>
+							</ul>
+							</section>
+
+							<section>
+							<h1>a solution!</h1>
+							<p>&nbsp;</p>
+							<h2>cron jobs</h2>
+							</section>
+
+							<section>
+							<h1>cool, but . . .</h1>
+							<ul>
+											<li>too manual</li>
+											<li>hard to repeat</li>
+							</ul>
+							</section>
+
+							<section>
+							<h1>a better solution!</h1>
+							<h2><a href="http://www.puppetlabs.com/puppet">puppet</a></h2>
+							</section>
+
+							<section>
+							<h1>break it down</h1>
+							<ul>
+											<li>smallest logical unit</li>
+											<li>focus on reusability</li>
+											<li>what about locally-populated repos?</li>
+							</ul>
+							</section>
+
+							<section>
+							<h1>reposync</h1>
+							<ul>
+											<li>puppet defined type</li>
+											<li>parameters control options</li>
+											<li>instantiate as needed</li>
+											<li><code>/usr/bin/reposync</code> from <strong>yum-utils</strong> package</li>
+											<li>mirrors remote repo to local directory</li>
+									
+							</ul>
+							</section>
+
+							<section>
+							<h1>define</h1>
+							<p>&nbsp;</p>
+							<pre><code>define reposync (
+  $path    = "/var/yumrepos/${name}",
+  $owner   = root,
+  $group   = root,
+  $cache   = "/var/cache/reposync/${name}",
+  $comps   = true,
+  $gpg     = true,
+  $newest  = false,
+  $plugins = true,
+  $source  = false,
+  $hour    = 5,
+  $minute  = 10,
+)
+{</code></pre>
+							</section>
+
+							<section>
+							<h1>instantiate</h1>
+							<p>&nbsp;</p>
+							<pre><code>reposync { 'rhel-6-server':
+  path   => '/pub/repos/rhel6',
+  source => true,
+  hour   => 4,
+}</code></pre>
+							</section>
+							
+							<section>
+							<h1>look! a cron job</h1>
+							<pre><code>  $cmd = "/usr/bin/reposync -r ${name} -p ${path} -e ${cache} -q"
+  $args = "${_comps} ${_plugins} ${_gpg} ${_newest} ${_source}"
+
+  cron { "reposync-${name}":
+    ensure  => present,
+    command => "${cmd} ${args}",
+    hour    => $hour,
+    minute  => $minute,
+    user    => $owner,
+  }</code></pre>
+							</section>
+
+							<section>
+							<h1>creatrepo</h1>
+							<ul>
+											<li>puppet defined type</li>
+											<li>parameters control options</li>
+											<li>instantiate as needed</li>
+											<li><code>/usr/bin/createrepo</code> from <strong>createrepo</strong> package</li>
+											<li>creates repo metadata</li>
+							</ul>
+							</section>
+
+							<section>
+							<h1>define</h1>
+							<p>&nbsp;</p>
+							<pre><code>define createrepo (
+  $path    = "/var/repo/${name}",
+  $cache   = "/var/cache/createrepo/${name}",
+  $owner   = root,
+  $group   = root,
+  $workers = $::processorcount,
+  $hour    = 6,
+  $minute  = 15,
+) {</code></pre>
+							</section>
+
+							<section>
+							<h1>instantiate</h1>
+							<p>&nbsp;</p>
+							<pre><code>createrepo { 'rhel-6-server':
+  hour => 2,
+}</code></pre>
+							</section>
+							
+							<section>
+							<h1>another cron job!</h1>
+							<pre><code>  $cmd = '/usr/bin/createrepo'
+  $args = "-q -c ${cache} --simple-md-filenames --deltas --workers ${workers}"
+
+  cron { "update-createrepo-${name}":
+    command => "${cmd} ${args} --update ${path}",
+    user    => $owner,
+    hour    => $hour,
+    minute  => $minute,
+  }</code></pre>
+							</section>
+							
+							<section>
+							<h1>web server</h1>
+							<ul>
+											<li><a href="https://forge.puppetlabs.com/puppetlabs/apache">https://forge.puppetlabs.com/puppetlabs/apache</a></li>
+											<li>Officially supported module:<br />
+											<a href="https://forge.puppetlabs.com/support">https://forge.puppetlabs.com/supported</a></li>
+							</ul>
+							<pre><code>apache::vhost { $::fqdn:
+  access_log_file    => "${::fqdn}.log",
+  docroot            => '/pub/repos',
+  servername         => $::fqdn,
+}</code></pre>
+							<h4>or nginx. . . </h4>
+							</section>
+
+							<section>
+							<h1>rock and roll</h1>
+							<h3>as many mirrors as we want!</h3>
+							<pre><code>reposync { 'rhel-6-server':
+  path   => '/pub/repos/rhel6',
+  source => true,
+  hour   => 4,
+  minute => 15,
+}
+
+createrepo { 'rhel-6-server':
+  hour   => 4,
+  minute => 30,
+}</code></pre>
+							<h3>. . . just copy and paste . . .</h3>
+							<h3>. . .and manually change some values . . .</h3>
+							</section>
+
+							<section>
+							<h1>shortcomings</h1>
+							<ul>
+								<li>lots of redundancy</li>
+								<li>lots of fiddling</li>
+								<li>hard to integrate with hiera</li>
+								<li>not very puppet-y</li>
+							</ul>
+							</section>	
+
+							<section>
+							<h1>a better</h1>
+							<h1>better solution</h1>
+							</section>
+
+							<section>
+							<h1>more puppet-y</h1>
+							<ul>
+								<li>combine reposync and createrepo</li>
+								<li>forget locally-populated repos</li>
+								<li>more hiera friendly</li>
+							</ul>
+							</section>
+
+							<section>
+							<h1>repomirror</h1>
+							<p>&nbsp;</p>
+							<pre><code>define repomirror (
+  $path       = "/var/repomirror/${name}",
+  $owner      = root,
+  $group      = root,
+  $cache      = "/var/cache/repomirror/${name}",
+  $arch       = $::architecture,
+  $comps      = true,
+  $delete     = false,
+  $gpg        = true,
+  $newest     = false,
+  $norepopath = false,
+  $plugins    = true,
+  $source     = false,
+  $workers    = $::processorcount,
+  $hour       = 5,
+  $minute     = 10,
+) {</code></pre>
+							</section>
+
+							<section>
+							<h1>one big cron job</h1>
+							<p>&nbsp;</p>
+							<pre><code>  $r_cmd = "/usr/bin/reposync -r ${name} -p ${path} -e ${cache} -q"
+  $r_args = "-a ${arch} ${_comps} ${_delete} ${_gpg} ${_newest} ${_norepo} ${_plugins} ${_source}"
+
+  $c_cmd = '/usr/bin/createrepo'
+  $c_args = "-q -c ${cache} --simple-md-filenames --deltas --workers ${workers}"
+
+  cron { "repomirror-${name}":
+    ensure  => present,
+    command => "${r_cmd} ${r_args} &amp;&amp; ${c_cmd} ${c_args} --update ${path}",
+    hour    => $hour,
+    minute  => $minute,
+    user    => $owner,
+  }</code></pre>
+							</section>
+							<section>
+							<h1>hiera</h1>
+							<p>&nbsp;</p>
+							<pre><code>class yum_mirror ( $repos ) {
+  validate_hash( $repos )
+  create_resources( repomirror, $repos )
+}
+</code></pre>
+							<pre><code>---
+yum_mirror::repos:
+  base:
+    path: /pub/repos/centos6
+    hour: 5
+    minute: 15
+  extras:
+    path: /pub/repos/centos6-extras
+    hour: 5
+    minute: 30
+</code></pre>
+							</section>
+
+							<section>
+							<p><a href="https://github.com/covermymeds.com/puppet-repomirror">https://github.com/covermymeds/puppet-repomirror</a></p>
+							</section>
+
+							<section>
+							<h1>thank you!</h1>
+							</section>
+			</div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.min.js"></script>
+
+		<script>
+
+			// Full list of configuration options available here:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+				transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+				// Parallax scrolling
+				// parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+				// parallaxBackgroundSize: '2100px 900px',
+
+				// Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>
