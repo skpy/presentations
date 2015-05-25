@@ -1,10 +1,11 @@
 # Gluster
 
-Central Ohio Linux User Group  
+[Central Ohio Linux User Group](http://colug.net/)  
 Scott Merrill  
 skippy@skippy.net  
-@smerrill
+[@smerrill](https://twitter.com/smerrill)  
 https://github.com/skpy/presentations/blob/master/COLUG/2015/gluster.md
+
 
 
 > GlusterFS is a scalable network filesystem. Using common off-the-shelf hardware, you can create large, distributed storage solutions for media streaming, data analysis, and other data- and bandwidth-intensive tasks. GlusterFS is free and open source software. 
@@ -22,22 +23,22 @@ https://github.com/skpy/presentations/blob/master/COLUG/2015/gluster.md
 
 
 ## Terminology
-* **Trusted Storage Pool**:  Gluster servers participate in a trusted storage pool.
-* **Volumes**: GlusterFS volumes live within a trusted storage pool. 
-* **Bricks**: A volume is built from bricks. Bricks are simply directories on the GlusterFS servers. 
+* **Trusted Storage Pool**:  Gluster servers participate in a trusted storage pool
+* **Volumes**: GlusterFS volumes live within a trusted storage pool 
+* **Bricks**: A volume is built from bricks. Bricks are simply directories on the GlusterFS servers
 
 
 
 ## Volume Types
-* **Distributed**: distributes files throughout the bricks in the volume.
-* **Replicated**: replicates files across bricks in the volume.
-* **Striped**: stripes data across bricks in the volume.
+* **Distributed**: distributes files throughout the bricks in the volume
+* **Replicated**: replicates files across bricks in the volume
+* **Striped**: stripes data across bricks in the volume
 
 
-* **Distributed Striped**: stripe data across two or more nodes in the cluster.
-* **Distributed Replicated**: distributes files across replicated bricks in the volume.
-* **Distributed Striped Replicated**: distributes striped data across replicated bricks in the cluster.
-* **Striped Replicated**: stripes data across replicated bricks in the cluster.
+* **Distributed Striped**: stripe data across two or more nodes in the cluster
+* **Distributed Replicated**: distributes files across replicated bricks in the volume
+* **Distributed Striped Replicated**: distributes striped data across replicated bricks in the cluster
+* **Striped Replicated**: stripes data across replicated bricks in the cluster
 
 
 
@@ -70,9 +71,9 @@ It is possible for the DHT hash to resolve a file write operation to a brick tha
 
 
 ## DHT: renames
-GlusterFS leaves original file alone and creates a small pointer file at the new hash location.
-* pointer tells GlusterFS to use the original file.  
-* avoids need to shuffle large amounts of data.  
+GlusterFS leaves original file alone and creates a small pointer file at the new hash location
+* pointer tells GlusterFS to use the original file
+* avoids need to shuffle large amounts of data
 * means at least two I/O operations to resolve!
 
 
@@ -82,10 +83,21 @@ GlusterFS leaves original file alone and creates a small pointer file at the new
 
 
 ## Bricks
-* xfs or ext4
-  * requires xattr support
+* require xattr support
+  * xfs or ext4
 * LVM recommended
   * allows for transparent expansion
+
+
+## Brick layout
+Create and mount a logical volume, and then create a directory underneath that for the actual brick
+```
+$ sudo mkdir -p /bricks/foo
+$ sudo mount /dev/mapper/bricks-foo /bricks/foo
+$ sudo mkdir /bricks/foo/brick
+```
+Ensures that no writes will occur to the mountpoint if the mount fails
+
 
 
 ## Volumes
@@ -126,7 +138,7 @@ Many [options](https://github.com/gluster/glusterfs/blob/master/doc/admin-guide/
 
 
 ## SSL
-Default protocol is plaintext / insecure.
+Default protocol is plaintext / insecure
 
 SSL is [available](https://github.com/gluster/glusterfs/blob/master/doc/admin-guide/en-US/markdown/admin_ssl.md)
 
@@ -187,12 +199,13 @@ State: Peer in Cluster (Connected)
 Be sure to create and mount brick LVs first!
 ```
 $ sudo gluster volume create dist1 \
-  192.168.99.111:/bricks/dist1 \
-  192.168.99.121:/bricks/dist1
+  192.168.99.111:/bricks/dist1/brick \
+  192.168.99.121:/bricks/dist1/brick
 volume create: dist1: success: please start the volume to access data
 $ sudo gluster volume status dist1
 Volume dist1 is not started
 ```
+Remember to use sub-directory, rather than mountpoint, for brick!
 
 
 ```
@@ -204,8 +217,8 @@ Status: Created
 Number of Bricks: 2
 Transport-type: tcp
 Bricks:
-Brick1: 192.168.99.111:/bricks/dist1
-Brick2: 192.168.99.121:/bricks/dist1
+Brick1: 192.168.99.111:/bricks/dist1/brick
+Brick2: 192.168.99.121:/bricks/dist1/brick
 ```
 
 
@@ -216,8 +229,8 @@ $ sudo gluster volume status dist1
 Status of volume: dist1
 Gluster process           Port  Online  Pid
 ------------------------------------------------------------------------------
-Brick 192.168.99.111:/bricks/dist1      49152 Y 4616
-Brick 192.168.99.121:/bricks/dist1      49152 Y 8009
+Brick 192.168.99.111:/bricks/dist1/brick      49152 Y 4616
+Brick 192.168.99.121:/bricks/dist1/brick      49152 Y 8009
 NFS Server on localhost         N/A N N/A
 NFS Server on 192.168.99.121        N/A N N/A
 
@@ -231,12 +244,13 @@ There are no active volume tasks
 ## Create Replicated Volume
 ```
 $ sudo gluster volume create repl1 replica 2 \
-  192.168.99.111:/bricks/repl1 
-  192.168.99.121:/bricks/repl1
+  192.168.99.111:/bricks/repl1/brick 
+  192.168.99.121:/bricks/repl1/brick
 volume create: repl1: success: please start the volume to access data
 $ sudo gluster volume start repl1
 volume start: repl1: success
 ```
+Remember to use sub-directory, rather than mountpoint, for brick!
 
 
 ```
@@ -249,8 +263,8 @@ Status: Started
 Number of Bricks: 1 x 2 = 2
 Transport-type: tcp
 Bricks:
-Brick1: 192.168.99.111:/bricks/repl1
-Brick2: 192.168.99.121:/bricks/repl1
+Brick1: 192.168.99.111:/bricks/repl1/brick
+Brick2: 192.168.99.121:/bricks/repl1/brick
 ```
 
 
@@ -259,8 +273,8 @@ $ sudo gluster volume status repl1
 Status of volume: repl1
 Gluster process           Port  Online  Pid
 ------------------------------------------------------------------------------
-Brick 192.168.99.111:/bricks/repl1      49153 Y 4807
-Brick 192.168.99.121:/bricks/repl1      49153 Y 8050
+Brick 192.168.99.111:/bricks/repl1/brick      49153 Y 4807
+Brick 192.168.99.121:/bricks/repl1/brick      49153 Y 8050
 NFS Server on localhost         2049  Y 4819
 Self-heal Daemon on localhost       N/A Y 4826
 NFS Server on 192.168.99.121        2049  Y 8064
@@ -278,7 +292,7 @@ Point at any brick, client will find all other bricks
 ```
 $ sudo mount -t glusterfs 192.168.99.121:/dist1 /mnt
 $ sudo touch /mnt/one.txt
-$ ls /bricks/dist1 # repeat on both servers
+$ ls /bricks/dist1/brick # repeat on both servers
 $ sudo umount /mnt
 ```
 
@@ -286,7 +300,7 @@ $ sudo umount /mnt
 ```
 $ sudo mount -t glusterfs 192.168.99.121:/repl1 /mnt
 $ sudo touch /mnt/two.txt
-$ ls /bricks/repl1 # repeat on both servers
+$ ls /bricks/repl1/brick # repeat on both servers
 $ sudo umount /mnt
 ```
 
