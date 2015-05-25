@@ -307,6 +307,8 @@ $ sudo umount /mnt
 
 
 ## Other fun stuff
+* disable NFS
+* change timeout
 * stop a brick, confirm volume still works
 * trigger self-heal on replicated volume
 * add / remove bricks and rebalance data
