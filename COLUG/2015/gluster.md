@@ -4,7 +4,7 @@ Central Ohio Linux User Group
 Scott Merrill  
 skippy@skippy.net  
 @smerrill
-
+https://github.com/skpy/presentations/blob/master/COLUG/2015/gluster.md
 
 
 > GlusterFS is a scalable network filesystem. Using common off-the-shelf hardware, you can create large, distributed storage solutions for media streaming, data analysis, and other data- and bandwidth-intensive tasks. GlusterFS is free and open source software. 
