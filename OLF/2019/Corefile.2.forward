@@ -1,0 +1,6 @@
+.:1053 {
+  forward . 9.9.9.9 1.1.1.1
+  health
+  log
+  cache 300
+}

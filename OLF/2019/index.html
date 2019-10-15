@@ -62,11 +62,19 @@ Or the first DNS RFC number?
 BIND: Berkeley Internet Name Daemon
 
 ---
+# DNS lookups
+![Example of an iterative DNS resolver](dns.svg)
+
+[source](https://upload.wikimedia.org/wikipedia/commons/a/a5/Example_of_an_iterative_DNS_resolver.svg)
+
+---
 # DNS Software
 
-** Authoritative **
+**Authoritative** servers hold records that answer DNS queries.
 
-** Recursive **
+**Recursive** servers do not hold records, and ask authoritative servers for answers.
+
+**Caching** servers store answers for some period of time.
 
 * Many choices of DNS server software
 * All have different features, benefits and drawbacks
@@ -89,12 +97,19 @@ BIND: Berkeley Internet Name Daemon
 * Joined [Cloud Native Computing Foundation](https://coredns.io/2017/03/02/why-cncf-for-coredns/) July 2017
 
 ---
-# Main features
+# CoreDNS features
 
-* Written in Go
+* Written in [Go](https://golang.org/)
 * Single binary
-* Easily containerized
-* CNCF official project
+* Supported [container](https://hub.docker.com/u/coredns)
+* [CNCF](https://www.cncf.io/) official project
+
+---
+# CoreDNS features
+
+* Authoritative DNS server (**not** a recursive resolver)
+* Plugins for caching, forwarding, rewriting, logging, and more!
+* Multiple protocol support (UDP, [gRPC](https://coredns.io/plugins/grpc/), [DNS over TLS](https://coredns.io/plugins/tls/))
 
 ---
 # Why use it (at home)?
@@ -106,12 +121,97 @@ BIND: Berkeley Internet Name Daemon
 * protect your DNS lookups
 
 ---
-# Demo
+# Demo: No config 
 
-* Install
-* Simple resolver
-* DNS over HTTPS
-* DNS over TLS
+```basic
+./coredns -dns.port 1053
+```
+
+```basic
+dig @localhost -p 1053 ohiolinux.org
+```
+
+---
+# Demo: whoami
+
+```basic
+whoami.org:1053 {
+  whoami
+  log
+}
+```
+
+```basic
+./coredns -conf Corefile.0.whoami
+```
+
+```basic
+dig @localhost -p 1053 whoami.org
+```
+
+---
+# Demo: health
+
+```basic
+whoami.org:1053 {
+  whoami
+  health
+  log
+}
+```
+
+```basic
+./coredns -conf Corefile.1.health
+```
+
+```basic
+curl http://127.0.0.1:8080
+```
+
+---
+# Demo: forward
+
+```basic
+.:1053 {
+  forward . 9.9.9.9 1.1.1.1
+  health
+  log
+  cache 300
+}
+```
+
+```basic
+./coredns -conf Corefile.2.forward
+```
+
+```basic
+curl http://127.0.0.1:8080
+dig @localhost -p 1053 ohiolinux.org
+```
+
+---
+# Demo: DNS over TLS
+
+```basic
+.:1053 {
+  forward . tls://9.9.9.9 tls://149.112.112.112 {
+    tls_servername dns.quad9.net
+    health_check 5s
+  }
+  health
+  log
+  cache 300
+}
+```
+
+```basic
+./coredns -conf Corefile.3.tls
+```
+
+```basic
+curl http://127.0.0.1:8080
+dig @localhost -p 1053 ohiolinux.org
+````
 
 ---
 # Links

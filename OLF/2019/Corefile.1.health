@@ -1,0 +1,5 @@
+whoami.org:1053 {
+  whoami
+  health
+  log
+}
