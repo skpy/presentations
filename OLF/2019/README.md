@@ -2,7 +2,7 @@
 
 A gentle introduction to [CoreDNS](https://coredns.io/) for the 2019 [Ohio LinuxFest](https://ohiolinux.org/).
 
-Presentation contents copyright 2019 Scott Merrill.  Released under the terms of the [Creative Commons Attribution 4.0 Internationa](https://creativecommons.org/licenses/by/4.0/) license (CC BY 4.0).
+Presentation contents copyright 2019 Scott Merrill.  Released under the terms of the [Creative Commons Attribution 4.0 International](https://creativecommons.org/licenses/by/4.0/) license (CC BY 4.0).
 
 ---
 
