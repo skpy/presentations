@@ -23,9 +23,10 @@ https://coredns.io
 ---
 # Who am I?
 
+* https://skippy.net/
 * Linux user since 1999
 * Professional systems administrator
-* Former OLF staffer
+* OLF enthusiast  
 
 ---
 # Why should you listen to me?
@@ -60,6 +61,11 @@ Or the first DNS RFC number?
 * RFC 882
 
 BIND: Berkeley Internet Name Daemon
+
+---
+# DNS Hierarchy
+
+![DNS hierarchy](https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/DNS_schema.svg/640px-DNS_schema.svg.png)
 
 ---
 # DNS lookups
@@ -134,6 +140,8 @@ dig @localhost -p 1053 ohiolinux.org
 ---
 # Demo: whoami
 
+> The whoami plugin is not really that useful, but can be used for having a simple (fast) endpoint to test clients against. When whoami returns a response it will have your client’s IP address in the additional section as either an A or AAAA record.
+
 ```basic
 whoami.org:1053 {
   whoami
@@ -148,6 +156,8 @@ whoami.org:1053 {
 ```basic
 dig @localhost -p 1053 whoami.org
 ```
+
+> If CoreDNS can’t find a Corefile on startup this is the default plugin that gets loaded. As such it can be used to check that CoreDNS is responding to queries. Other than that this plugin is of limited use in production.
 
 ---
 # Demo: health
@@ -165,7 +175,7 @@ whoami.org:1053 {
 ```
 
 ```basic
-curl http://127.0.0.1:8080
+curl http://127.0.0.1:8080/health
 ```
 
 ---
@@ -192,6 +202,18 @@ dig @localhost -p 1053 ohiolinux.org
 ---
 # Demo: DNS over TLS
 
+quad9.net:
+```
+openssl s_client -connect 9.9.9.9:853
+```
+
+cloudflare-dns.com:
+```
+openssl s_client -connect 1.1.1.1:853
+```
+
+---
+# Demo: DNS over TLS
 ```basic
 .:1053 {
   forward . tls://9.9.9.9 tls://149.112.112.112 {
@@ -211,7 +233,7 @@ dig @localhost -p 1053 ohiolinux.org
 ```basic
 curl http://127.0.0.1:8080
 dig @localhost -p 1053 ohiolinux.org
-````
+```
 
 ---
 # Links
