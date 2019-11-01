@@ -23,6 +23,10 @@ https://coredns.io
 ---
 # Who am I?
 
+---
+# Who am I?
+
+* Scott Merrill
 * https://skippy.net/
 * Linux user since 1999
 * Professional systems administrator
@@ -31,8 +35,12 @@ https://coredns.io
 ---
 # Why should you listen to me?
 
+---
+# Why should you listen to me?
+
 * You probably shouldn’t. 
 * I don’t run DNS at scale. 
+* I don't understand DNSSEC.
 * I only tinker.
 
 ---
@@ -62,6 +70,17 @@ Or the first DNS RFC number?
 
 BIND: Berkeley Internet Name Daemon
 
+
+---
+# DNS technical deep dive
+
+---
+# DNS technical deep dive
+
+Just kidding!
+
+Quick recap.
+
 ---
 # DNS Hierarchy
 
@@ -74,6 +93,12 @@ BIND: Berkeley Internet Name Daemon
 ![Example of an iterative DNS resolver](https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Example_of_an_iterative_DNS_resolver.svg/800px-Example_of_an_iterative_DNS_resolver.svg.png)
 
 [source](https://commons.wikimedia.org/wiki/File:Example_of_an_iterative_DNS_resolver.svg)
+
+---
+# DNS protocol
+
+* UDP port 53
+* plaintext
 
 ---
 # DNS Software
@@ -205,12 +230,12 @@ dig @localhost -p 1053 ohiolinux.org
 # Demo: DNS over TLS
 
 quad9.net:
-```
+```basic
 openssl s_client -connect 9.9.9.9:853
 ```
 
 cloudflare-dns.com:
-```
+```basic
 openssl s_client -connect 1.1.1.1:853
 ```
 
@@ -229,7 +254,8 @@ openssl s_client -connect 1.1.1.1:853
 ```
 
 ```basic
-./coredns -conf Corefile.3.tls
+./coredns -conf Corefile.3.tls_quad9
+./coredns -conf Corefile.3.tls_cloudflare
 ```
 
 ```basic
@@ -242,6 +268,8 @@ dig @localhost -p 1053 ohiolinux.org
 * [github.com/skpy/presentations/OLF/2019](https://github.com/skpy/presentations/tree/master/OLF/2019)
 * [DNS over HTTPS · curl Wiki](https://github.com/curl/curl/wiki/DNS-over-HTTPS)
 * [Intro to CoreDNS webinar by John Belamaric](https://coredns.io/2017/08/01/intro-to-coredns-webinar-by-john-belamaric/)
+* [Quad9](https://quad9.net/)
+* [Cloudflare DNS](https://cloudflare-dns.com/)
     </textarea>
     <!-- Presentation End -->
 
